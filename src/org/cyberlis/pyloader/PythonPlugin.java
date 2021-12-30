@@ -42,9 +42,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.cyberlis.dataloaders.PluginDataFile;
 import org.python.util.PythonInterpreter;
 
-import com.avaje.ebean.EbeanServer;
-import com.avaje.ebeaninternal.api.SpiEbeanServer;
-import com.avaje.ebeaninternal.server.ddl.DdlGenerator;
 
 /**
 */
@@ -59,7 +56,6 @@ private boolean isEnabled = false;
     //private ClassLoader classLoader = null;
     private Configuration config = null;
     private boolean naggable = true;
-    private EbeanServer ebean = null;
     private FileConfiguration newConfig = null;
     private File configFile = null;
     private PluginLogger logger = null;
@@ -176,7 +172,6 @@ private boolean isEnabled = false;
      * @param description PluginDescriptionFile containing metadata on this plugin
      * @param dataFolder Folder containing the plugin's data
      * @param file File containing this plugin
-     * @param classLoader ClassLoader which holds this plugin
      */
     protected final void initialize(PluginLoader loader, Server server,
             PluginDescriptionFile description, File dataFolder, File file ) { //,
@@ -259,24 +254,6 @@ private boolean isEnabled = false;
         this.naggable = canNag;
     }
 
-    public EbeanServer getDatabase() {
-        return ebean;
-    }
-
-    protected void installDDL() {
-        SpiEbeanServer serv = (SpiEbeanServer) getDatabase();
-        DdlGenerator gen = serv.getDdlGenerator();
-
-        gen.runScript(false, gen.generateCreateDdl());
-    }
-
-    protected void removeDDL() {
-        SpiEbeanServer serv = (SpiEbeanServer) getDatabase();
-        DdlGenerator gen = serv.getDdlGenerator();
-
-        gen.runScript(true, gen.generateDropDdl());
-    }
-
     public Logger getLogger() {
         if (logger == null) {
             logger = new PluginLogger(this);
@@ -348,15 +325,15 @@ private boolean isEnabled = false;
         if (configFile != null){
             newConfig = YamlConfiguration.loadConfiguration(configFile);
 
-            InputStream defConfigStream = getResource("config.yml");
-            if (defConfigStream != null) {
+            File defConfigStream = new File("config.yml");
+            if (defConfigStream.exists()) {
                 YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
 
                 newConfig.setDefaults(defConfig);
             }
         } else {
-            InputStream defConfigStream = getResource("config.yml");
-            if (defConfigStream != null) {
+            File defConfigStream = new File("config.yml");
+            if (defConfigStream.exists()) {
                 newConfig = YamlConfiguration.loadConfiguration(defConfigStream);
             }
         }
